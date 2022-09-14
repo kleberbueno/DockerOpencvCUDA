@@ -4,7 +4,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 ARG OPENCV_VERSION=4.5.0
 
-RUN apt update && apt install -y --no-install-recommends build-essential \
+RUN apt update && apt install -y build-essential \
     cmake \
     gcc \
     g++ \
