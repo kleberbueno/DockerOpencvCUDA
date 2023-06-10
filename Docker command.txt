@@ -1,0 +1,25 @@
+docker build -t opencv4.7-cuda-11.2-cudnn8 . --progress=plain --no-cache
+
+
+
+
+##rodar container com acesso internet habilitando gpu
+docker run -it --gpus all --net=host opencv4.7-cuda-11.2-cudnn8_release
+
+
+
+
+##install tensorflow GPU 
+pip install "tensorflow<2.11" 
+
+
+##check GPU i
+python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
+
+
+
+append file ~/.bashrc
+export PYTHONPATH=/usr/local/lib/python3.8/site-packages:$PYTHONPATH
+
+
+echo export PYTHONPATH=/usr/local/lib/python3.8/site-packages:$PYTHONPATH ~/.bashrc
