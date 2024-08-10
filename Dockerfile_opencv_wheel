@@ -1,0 +1,60 @@
+FROM nvidia/cuda:12.2.2-cudnn8-runtime-ubuntu22.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt update && \
+      apt -y install sudo
+
+#RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo
+
+#RUN usermod -aG sudo docker
+
+#RUN sudo -s
+
+RUN apt-get update
+
+RUN apt-get install -y software-properties-common
+
+RUN add-apt-repository ppa:deadsnakes/ppa
+
+RUN apt-get update
+
+
+##trying to add version 3.9
+#RUN apt-get install -y python3.9
+#RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+#RUN unlink /usr/bin/python3
+#RUN ln -s /usr/bin/python3.9 /usr/bin/python3
+#RUN apt-get purge --auto-remove -y python3.10
+#RUN ln -s /usr/bin/python3.9 /usr/bin/python3
+#RUN ls -lrth /usr/bin/python*
+
+RUN apt-get install -y python3-pip
+
+RUN apt update && apt install -y build-essential \
+    git \
+    wget \
+    unzip 
+
+WORKDIR /tmp
+
+RUN wget https://github.com/cudawarped/opencv-python-cuda-wheels/releases/download/4.9.0.80/opencv_contrib_python-4.9.0.80-cp37-abi3-linux_x86_64.whl
+RUN pip install opencv_contrib_python-4.9.0.80-cp37-abi3-linux_x86_64.whl
+
+RUN pip uninstall -y numpy
+
+RUN pip install numpy==1.26.4
+
+
+#RUN pip install tensorflow==2.15.0
+
+ENV NVIDIA_DRIVER_CAPABILITIES=all
+ENV NVIDIA_VISIBLE_DEVICES=all
+
+RUN rm -rf /tmp/*
+
+RUN mkdir /app
+
+WORKDIR /app
+
+

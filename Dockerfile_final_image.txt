@@ -1,0 +1,3 @@
+FROM opencv4.9-cuda-12.2.2-cudnn8
+RUN umount /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1 && \
+    rm -rf /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1

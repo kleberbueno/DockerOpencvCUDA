@@ -1,0 +1,145 @@
+FROM ubuntu:22.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt update && \
+      apt -y install sudo
+
+
+RUN apt-get update 
+
+RUN apt install -y build-essential cmake pkg-config unzip yasm git checkinstall wget 
+
+
+RUN apt-get install -y ffmpeg
+
+
+#RUN apt-get install -y libjpeg-dev libpng-dev libtiff-dev
+
+
+#RUN apt-get update
+#************** Video/Audio Libs - FFMPEG, GSTREAMER, x264 and so on.
+
+#RUN apt install -y libavcodec-dev libavformat-dev libswscale-dev
+#RUN apt install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+#RUN apt install -y libxvidcore-dev x264 libx264-dev libtheora-dev 
+
+  
+#************** OpenCore - Adaptive Multi Rate Narrow Band (AMRNB) and Wide Band (AMRWB) speech codec
+
+#RUN apt install -y libopencore-amrnb-dev libopencore-amrwb-dev
+
+#**************** Cameras programming interface libs
+
+#RUN apt-get install -y libxine2-dev libv4l-dev v4l-utils 
+#WORKDIR /usr/include/linux 
+#RUN ln -s -f ../libv4l1-videodev.h videodev.h 
+
+WORKDIR /
+
+#****************** GTK lib for the graphical user functionalites coming from OpenCV highghui module
+
+#RUN apt-get install -y libgtk-3-dev
+
+
+#******************** Python libraries for python3:
+
+RUN apt install -y python3-pip
+
+
+
+#********************* Parallelism library C++ for CPU
+
+#RUN apt-get install -y libtbb-dev
+
+
+#*********************** Optimization libraries for OpenCV
+
+#RUN apt-get install -y libatlas-base-dev gfortran
+
+
+
+#************************ Optional libraries:
+
+#RUN apt-get install -y libprotobuf-dev protobuf-compiler
+#RUN apt-get install -y libgoogle-glog-dev libgflags-dev
+#RUN apt-get install -y libgphoto2-dev libeigen3-dev libhdf5-dev doxygen
+
+RUN apt update && apt dist-upgrade -y 
+RUN apt-get install -y libc6
+
+RUN apt install gcc
+
+
+#installing CUDA
+
+WORKDIR / 
+RUN mkdir installers 
+WORKDIR /installers
+
+RUN wget https://developer.download.nvidia.com/compute/cuda/12.5.1/local_installers/cuda_12.5.1_555.42.06_linux.run
+RUN sh cuda_12.5.1_555.42.06_linux.run  --toolkit --silent
+
+
+RUN echo 'export PATH="/usr/local/cuda-12.5/bin:$PATH"' >> ~/.zshrc # or .bashrc if you are using BASH
+RUN echo 'export LD_LIBRARY_PATH="/usr/local/cuda-12.5/lib64"' >> ~/.zshrc
+
+RUN echo 'export PATH="/usr/local/cuda-12.5/bin:$PATH"' >> ~/.bashrc
+RUN echo 'export LD_LIBRARY_PATH="/usr/local/cuda-12.5/lib64"' >> ~/.bashrc
+
+RUN export PATH=/usr/local/cuda-12.5/bin${PATH:+:${PATH}}
+RUN export LD_LIBRARY_PATH=/usr/local/cuda-12.5/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+
+
+RUN apt install xz-utils
+
+#*****************
+#download and install CUDNN
+#Go to https://developer.nvidia.com/cudnn to download the latest version of CUDNN for the latest CUDA toolkit version OR go to https://developer.nvidia.com/rdp/cudnn-archive to download a previous version of CUDNN that is #compatible with your CUDA toolkit
+
+WORKDIR /installers
+RUN wget https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/linux-x86_64/cudnn-linux-x86_64-9.2.0.82_cuda12-archive.tar.xz
+#COPY cudnn/* /installers
+RUN tar xf cudnn-linux-x86_64-9.2.0.82_cuda12-archive.tar.xz
+
+
+RUN cp -P cudnn-linux-x86_64-9.2.0.82_cuda12-archive/lib/* /usr/local/cuda-12.5/lib64/
+RUN cp -P cudnn-linux-x86_64-9.2.0.82_cuda12-archive/include/* /usr/local/cuda-12.5/include/
+
+
+
+#***to enable mysql pip package
+RUN apt-get update
+RUN apt-get install -y gcc libmysqlclient-dev python3-dev
+
+
+
+WORKDIR /app
+COPY requirements.txt .
+
+RUN pip install --upgrade --no-cache-dir --use-deprecated=legacy-resolver -r requirements.txt
+#RUN pip install -r requirements.txt
+
+
+
+
+WORKDIR /installers
+
+RUN wget https://github.com/cudawarped/opencv-python-cuda-wheels/releases/download/4.10.0.84/opencv_contrib_python-4.10.0.84-cp37-abi3-linux_x86_64.whl
+RUN pip install https://github.com/cudawarped/opencv-python-cuda-wheels/releases/download/4.10.0.84/opencv_contrib_python-4.10.0.84-cp37-abi3-linux_x86_64.whl
+
+
+RUN rm -rf /tmp/*
+RUN rm -rf /installers
+
+ENV NVIDIA_DRIVER_CAPABILITIES=all
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV PYTHONPATH="${PYTHONPATH}:/app"
+
+
+#RUN pip install --upgrade numpy==1.26.4 
+
+#RUN umount --force /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1 && \
+#    rm -rf /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1
+
+WORKDIR /app
